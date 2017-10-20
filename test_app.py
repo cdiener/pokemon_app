@@ -69,29 +69,10 @@ def test_response_format(app, body):
     assert all(k in data for k in good_response)
 
 
-def test_predict_winners(app):
-    accuracy = 0
-    for _, r in combats.iterrows():
-        body = {"pokemon 1": r.First_pokemon, "pokemon 2": r.Second_pokemon}
-        resp = post_json(app, body)
-        try:
-            data = json.loads(resp.get_data(True))
-            accuracy += data["Winner"] == r.Winner
-        except Exception:
-            pass
-    accuracy /= 1000.0
-    assert accuracy > 0.9
-
-
-def test_better_predict_winners(app):
-    accuracy = 0.0
-    for _, r in combats.iterrows():
-        body = {"pokemon 1": r.First_pokemon, "pokemon 2": r.Second_pokemon}
-        resp = post_json(app, body)
-        try:
-            data = json.loads(resp.get_data(True))
-            accuracy += data["Winner"] == r.Winner
-        except Exception:
-            pass
-    accuracy /= combats.shape[0]
-    assert accuracy > 0.99
+@pytest.mark.parametrize("row", combats.iterrows())
+def test_predict_winners(app, row):
+    _, r = row
+    body = {"pokemon 1": r.First_pokemon, "pokemon 2": r.Second_pokemon}
+    resp = post_json(app, body)
+    data = json.loads(resp.get_data(True))
+    assert data["Winner"] == r.Winner
