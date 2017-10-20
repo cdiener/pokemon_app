@@ -43,7 +43,7 @@ Instala lo con `pip3 install --user -r requirements.txt`
 python3 app.py
 ```
 
-Esto expone tu app para la direccion http://localhost:8000. Lo puedes probar
+Esto expone tu app para la direccion http://localhost:5000. Lo puedes probar
 con [curl](https://es.wikipedia.org/wiki/CURL)  o usand puro python con la
 librería de requests:
 
