@@ -49,7 +49,7 @@ librería de requests:
 
 ```python
 response = requests.post("http://localhost:5000",
-                    json={"pokemon 1": "Pikachu", "pokemon 2": "Bulbasaur"})
+                         json={"pokemon 1": "Pikachu", "pokemon 2": "Bulbasaur"})
 
 response.status_code
 # 400
