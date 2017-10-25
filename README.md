@@ -40,6 +40,7 @@ Instala lo con `pip3 install --user -r requirements.txt`
 # Como correr la App
 
 ```bash
+python3 train.py  # para sacar el modelo entrenado
 python3 app.py
 ```
 
