@@ -75,4 +75,4 @@ def test_predict_winners(app, row):
     body = {"pokemon 1": r.First_pokemon, "pokemon 2": r.Second_pokemon}
     resp = post_json(app, body)
     data = json.loads(resp.get_data(True))
-    assert data["Winner"] == r.Winner
+    assert data["winner"] == r.Winner
