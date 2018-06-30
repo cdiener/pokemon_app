@@ -19,14 +19,15 @@ output -> {
 from flask import Flask, jsonify, request
 import pickle
 import pandas as pd
+from keras.models import load_model
 
 app = Flask(__name__)
 app.secret_key = "pikapika"
 
 # Vamos a cargar el modelo y los stats de los Pokemones. Usamos el
-# nombre como ndex.
-with open("model.pickle", "rb") as infile:
-    model = pickle.load(infile)
+# nombre como index.
+model = load_model("model.h5")
+model._make_predict_function()
 stats = pd.read_pickle("stats.pickle")
 stats.index = stats.pokename
 
@@ -60,13 +61,13 @@ def winner(pokemon1, pokemon2):
     data = pd.concat([first, second]).drop("pokename")
     # predict espera una matrix entonces hay que convertir nuestro vector
     # a una matrix con una fila.
-    data = data.as_matrix().reshape(1, -1)
-    resp = model.predict_proba(data)
+    data = data.values.reshape(1, -1)
+    resp = model.predict(data)
     # Predict proba nos da dos probabilidades. La primera es para la clase
     # "0" = pierde Pokemon 1 y la segunda es para "1" = gana el Pokemon 1.
     # También lo da como matrix de una fila. Entonces tenemos que sacar el
     # valor en la primera fila (0) y de la segunda columna (1).
-    resp = resp[0, 1]
+    resp = float(resp[0, 0])
     # Si la probabilidad es > 0.5 gana el primer Pokemon, si no el segundo.
     winner = pokemon1 if resp > 0.5 else pokemon2
     conf = resp if resp > 0.5 else 1.0 - resp
@@ -98,6 +99,8 @@ def get_winner():
     - 400 con un mensaje de error para input malformado
 
     """
+    if request.method == "GET":
+        return "🎵🎵 I wanna be the very best... 🎵🎵", 200
     body = request.get_json()
     # Si el request no esta como queremos hay que dar un error
     if "pokemon 1" not in body or "pokemon 2" not in body:

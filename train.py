@@ -8,7 +8,8 @@ al menos una vez antes que corres la app.
 """
 
 from sklearn.preprocessing import StandardScaler
-from sklearn.ensemble import RandomForestClassifier
+from keras.models import Sequential
+from keras.layers import Dense, Dropout
 import pandas as pd
 import pickle
 
@@ -39,15 +40,19 @@ second = stats.loc[combats.Second_pokemon].reset_index(drop=True)
 train = pd.concat([first, second], axis=1)
 response = combats.First_pokemon == combats.Winner
 
-# Entrenamos un Random Forest y usamos el OOB score (exactitud) para
+# Entrenamos una read neuronal con 20% de los datos para validacion para
 # ver que bueno funciona.
-clf = RandomForestClassifier(100, n_jobs=4, oob_score=True)
-clf.fit(train, response)
-print("OOB estimate:", clf.oob_score_)
+clf = Sequential()
+clf.add(Dense(128, input_dim=train.shape[1], activation="relu"))
+clf.add(Dropout(0.1))
+clf.add(Dense(64, activation="relu"))
+clf.add(Dense(1, activation="sigmoid"))
+clf.compile(optimizer="adam", loss="binary_crossentropy",
+            metrics=["accuracy"])
+clf.fit(train, response, batch_size=64, epochs=40, validation_split=0.1)
 
 # Ahora vamos a guardar el modelo para la app.
-with open("model.pickle", "wb") as out:
-    pickle.dump(clf, out)
+clf.save("model.h5")
 
 # También guardamos los stats juntos con los nombres de los Pokemones.
 stats["pokename"] = pokemon.Name
