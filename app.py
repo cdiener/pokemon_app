@@ -27,7 +27,7 @@ app.secret_key = "pikapika"
 # Vamos a cargar el modelo y los stats de los Pokemones. Usamos el
 # nombre como index.
 model = load_model("model.h5")
-model._make_predict_function()
+model._make_predict_function()  # para que funciona con el modo del debugging
 stats = pd.read_pickle("stats.pickle")
 stats.index = stats.pokename
 
@@ -47,6 +47,7 @@ def winner(pokemon1, pokemon2):
     dict
         Nombres de los Pokemones combatantes, el ganador y la
         confianza que gana este Pokemon (de 0.5 a 1.0).
+
     """
     # Puede pasar que el request esta mal formado o se solicita un
     # Pokemon que no conocemos. En caso que todo esta bien sacamos los
@@ -63,10 +64,8 @@ def winner(pokemon1, pokemon2):
     # a una matrix con una fila.
     data = data.values.reshape(1, -1)
     resp = model.predict(data)
-    # Predict proba nos da dos probabilidades. La primera es para la clase
-    # "0" = pierde Pokemon 1 y la segunda es para "1" = gana el Pokemon 1.
-    # También lo da como matrix de una fila. Entonces tenemos que sacar el
-    # valor en la primera fila (0) y de la segunda columna (1).
+    # Predict nos da la probabilidad que gane el primer Pokemon. Pero lo da
+    # como una matrix de 1x1 (de hecho un solo valor).
     resp = float(resp[0, 0])
     # Si la probabilidad es > 0.5 gana el primer Pokemon, si no el segundo.
     winner = pokemon1 if resp > 0.5 else pokemon2
@@ -109,6 +108,16 @@ def get_winner():
     # result va ser None si no existe uno de los Pokemones...
     if result:
         return jsonify(result)
+    else:
+        return jsonify(error="Pokemon not found :("), 400
+
+@app.route("/<pokemon1>/<pokemon2>")
+def predict(pokemon1, pokemon2):
+    """Regresa el ganador por una API REST simple."""
+    result = winner(pokemon1, pokemon2)
+    # result va ser None si no existe uno de los Pokemones...
+    if result:
+        return jsonify(result), 200
     else:
         return jsonify(error="Pokemon not found :("), 400
 

@@ -10,6 +10,7 @@ al menos una vez antes que corres la app.
 from sklearn.preprocessing import StandardScaler
 from keras.models import Sequential
 from keras.layers import Dense, Dropout
+from keras.callbacks import TensorBoard
 import pandas as pd
 import pickle
 
@@ -49,7 +50,10 @@ clf.add(Dense(64, activation="relu"))
 clf.add(Dense(1, activation="sigmoid"))
 clf.compile(optimizer="adam", loss="binary_crossentropy",
             metrics=["accuracy"])
-clf.fit(train, response, batch_size=64, epochs=40, validation_split=0.1)
+print(clf.summary())
+tb = TensorBoard(log_dir="logs", write_images=True, histogram_freq=1)
+clf.fit(train, response, batch_size=64, epochs=40, validation_split=0.1,
+        callbacks=[tb])
 
 # Ahora vamos a guardar el modelo para la app.
 clf.save("model.h5")
